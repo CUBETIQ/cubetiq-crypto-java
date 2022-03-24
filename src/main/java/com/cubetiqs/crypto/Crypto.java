@@ -23,6 +23,14 @@ public class Crypto {
         return provider.encrypt(text);
     }
 
+    public byte[] encrypt(byte[] data) {
+        return provider.encrypt(data);
+    }
+
+    public byte[] decrypt(byte[] encrypted) {
+        return provider.decrypt(encrypted);
+    }
+
     private static Crypto instance;
 
     public static Crypto createInstance(CryptoProvider provider) {
