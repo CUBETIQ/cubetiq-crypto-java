@@ -12,19 +12,20 @@ import com.cubetiqs.crypto.core.CryptoUtil.Options;
  * @since 1.0
  */
 public class DefaultCryptoProvider implements CryptoProvider {
-    private final Options options;
+    private final CryptoOptions options;
 
     public DefaultCryptoProvider(String key, String iv) {
         assert key != null;
         this.options = new Options(key, iv);
     }
 
-    public DefaultCryptoProvider(Options options) {
+    public DefaultCryptoProvider(CryptoOptions options) {
         assert options != null;
         this.options = options;
     }
 
-    public Options getOptions() {
+    @Override
+    public CryptoOptions getOptions() {
         return options;
     }
 
@@ -37,12 +38,12 @@ public class DefaultCryptoProvider implements CryptoProvider {
     }
 
     @Override
-    public String encrypt(String text) {
-        return CryptoUtil.encrypt(text, getOptions());
+    public byte[] decrypt(byte[] data) {
+        return CryptoUtil.decrypt(data, getOptions());
     }
 
     @Override
-    public String decrypt(String text) {
-        return CryptoUtil.decrypt(text, getOptions());
+    public byte[] encrypt(byte[] encrypted) {
+        return CryptoUtil.encrypt(encrypted, getOptions());
     }
 }

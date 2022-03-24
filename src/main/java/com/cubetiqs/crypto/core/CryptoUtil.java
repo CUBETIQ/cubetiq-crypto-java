@@ -1,67 +1,50 @@
 package com.cubetiqs.crypto.core;
 
+import com.cubetiqs.crypto.CryptoProvider;
+
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
+
+import static com.cubetiqs.crypto.util.FunctionUtil.DEFAULT_ENCODING;
+import static com.cubetiqs.crypto.util.FunctionUtil.decodeBase64;
 
 public final class CryptoUtil {
-    private static final String CRYPTO_ALGORITHM = "AES";
-    private static final String CRYPTO_PADDING = "AES/CBC/PKCS5Padding";
     private static final int BUFFER_SIZE = 4 * 1024;
-    private static final Charset DEFAULT_ENCODING = StandardCharsets.UTF_8;
 
-    private static byte[] encodeBase64(byte[] bytes) {
-        return Base64.getEncoder().encode(bytes);
-    }
-
-    private static byte[] decodeBase64(byte[] bytes) {
-        return Base64.getDecoder().decode(bytes);
-    }
-
-    private static String encodeFromBoas(ByteArrayOutputStream boas) {
-        return new String(encodeBase64(boas.toByteArray()), DEFAULT_ENCODING);
-    }
-
-    private static String fromBoas(ByteArrayOutputStream boas) {
-        return boas.toString(DEFAULT_ENCODING);
-    }
-
-    public static String encrypt(String text, Options options) {
-        byte[] bytes = text.getBytes(DEFAULT_ENCODING);
+    public static byte[] encrypt(byte[] data, CryptoProvider.CryptoOptions options) {
         try (
-                InputStream fis = new ByteArrayInputStream(bytes);
+                InputStream fis = new ByteArrayInputStream(data);
                 ByteArrayOutputStream boas = new ByteArrayOutputStream()
         ) {
             encrypt(fis, boas, options);
-            return encodeFromBoas(boas);
+            return boas.toByteArray();
         } catch (Exception e) {
             System.out.println("Encrypt error: " + e.getMessage());
             return null;
         }
     }
 
-    public static String decrypt(String encrypted, Options options) {
-        byte[] bytes = decodeBase64(encrypted.getBytes(DEFAULT_ENCODING));
+    public static byte[] decrypt(byte[] encrypted, CryptoProvider.CryptoOptions options) {
         try (
-                InputStream fis = new ByteArrayInputStream(bytes);
+                InputStream fis = new ByteArrayInputStream(encrypted);
                 ByteArrayOutputStream boas = new ByteArrayOutputStream()
         ) {
             decrypt(fis, boas, options);
-            return fromBoas(boas);
+            return boas.toByteArray();
         } catch (Exception e) {
             System.out.println("Decrypt error: " + e.getMessage());
             return null;
         }
     }
 
-    public static void encrypt(InputStream is, OutputStream os, Options options)
+    public static void encrypt(InputStream is, OutputStream os, CryptoProvider.CryptoOptions options)
             throws NoSuchPaddingException, BadPaddingException,
             InvalidKeyException, NoSuchAlgorithmException,
             IOException, ShortBufferException,
@@ -69,7 +52,7 @@ public final class CryptoUtil {
         execute(Cipher.ENCRYPT_MODE, is, os, options);
     }
 
-    public static void decrypt(InputStream is, OutputStream os, Options options)
+    public static void decrypt(InputStream is, OutputStream os, CryptoProvider.CryptoOptions options)
             throws NoSuchPaddingException, BadPaddingException,
             InvalidKeyException, NoSuchAlgorithmException,
             IOException, ShortBufferException,
@@ -77,15 +60,15 @@ public final class CryptoUtil {
         execute(Cipher.DECRYPT_MODE, is, os, options);
     }
 
-    private static void execute(int mode, InputStream is, OutputStream os, Options options)
+    private static void execute(int mode, InputStream is, OutputStream os, CryptoProvider.CryptoOptions options)
             throws NoSuchPaddingException, NoSuchAlgorithmException,
             InvalidAlgorithmParameterException,
             InvalidKeyException, IOException, ShortBufferException,
             BadPaddingException, IllegalBlockSizeException {
-        Cipher cipher = Cipher.getInstance(CRYPTO_PADDING);
+        Cipher cipher = Cipher.getInstance(options.getPadding());
         SecretKeySpec _key = new SecretKeySpec(
                 decodeBase64(options.getKey().getBytes(DEFAULT_ENCODING)),
-                CRYPTO_ALGORITHM
+                options.getAlgorithm()
         );
 
         if (options.getIv() != null) {
@@ -110,64 +93,67 @@ public final class CryptoUtil {
         os.flush();
     }
 
-    public static class Options {
-        // Base64 encode
-        String key;
-        // Base64 encode
-        String iv;
+    public static class Options implements CryptoProvider.CryptoOptions {
+        @Override
+        public String toString() {
+            return "Options{" +
+                    "options=" + options +
+                    '}';
+        }
 
-        String algorithm;
-        String padding;
+        private final Map<String, String> options = new HashMap<>();
 
         public Options(String key, String iv) {
-            this.key = key;
-            this.iv = iv;
-            this.algorithm = CRYPTO_ALGORITHM;
-            this.padding = CRYPTO_PADDING;
+            setKey(key);
+            setIv(iv);
         }
 
         public Options(String key, String iv, String algorithm, String padding) {
-            this.key = key;
-            this.iv = iv;
-            this.algorithm = algorithm;
-            this.padding = padding;
+            setKey(key);
+            setIv(iv);
+            setAlgorithm(algorithm);
+            setPadding(padding);
         }
 
-        public String getKey() {
-            assert key != null;
-            return key;
+        public Options(String key, String iv, String algorithm, String padding, Map<String, String> moreOptions) {
+            setKey(key);
+            setIv(iv);
+            setAlgorithm(algorithm);
+            setPadding(padding);
+            options.putAll(moreOptions);
+        }
+
+        public Options(Map<String, String> options) {
+            this.options.putAll(options);
         }
 
         public void setKey(String key) {
-            this.key = key;
-        }
-
-        public String getIv() {
-            return iv;
+            setProperty(ENCRYPT_KEY, key);
         }
 
         public void setIv(String iv) {
-            this.iv = iv;
+            setProperty(ENCRYPT_IV, iv);
         }
 
-        public String getAlgorithm() {
-            return algorithm;
+        @Override
+        public String getProperty(String key) {
+            return options.get(key);
+        }
+
+        public void setProperty(String key, String value) {
+            options.put(key, value);
         }
 
         public void setAlgorithm(String algorithm) {
-            this.algorithm = algorithm;
-        }
-
-        public String getPadding() {
-            return padding;
+            setProperty(ENCRYPT_ALGORITHM, algorithm);
         }
 
         public void setPadding(String padding) {
-            this.padding = padding;
+            setProperty(ENCRYPT_PADDING, padding);
         }
 
         public static class Builder {
-            Options options;
+            private final Options options;
 
             public Builder() {
                 options = new Options(null, null);
@@ -190,6 +176,11 @@ public final class CryptoUtil {
 
             public Builder setPadding(String padding) {
                 options.setPadding(padding);
+                return this;
+            }
+
+            public Builder setProperty(String key, String value) {
+                options.setProperty(key, value);
                 return this;
             }
 

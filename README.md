@@ -10,6 +10,7 @@
 
 ```java
 import com.cubetiqs.crypto.core.CryptoUtil;
+import com.cubetiqs.crypto.util.FunctionUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -28,14 +29,14 @@ public class BasicTest {
 
     @Test
     public void encryptTest() {
-        String encrypted = CryptoUtil.encrypt(TEXT, options);
+        String encrypted = FunctionUtil.encrypt(TEXT, options);
         System.out.println("Encrypted: " + encrypted);
         Assertions.assertEquals(ENCRYPTED, encrypted);
     }
 
     @Test
     public void decryptTest() {
-        String decrypted = CryptoUtil.decrypt(ENCRYPTED, options);
+        String decrypted = FunctionUtil.decrypt(ENCRYPTED, options);
         System.out.println("Decrypted: " + decrypted);
         Assertions.assertEquals(TEXT, decrypted);
     }
