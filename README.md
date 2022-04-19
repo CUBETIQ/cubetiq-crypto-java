@@ -6,6 +6,22 @@
 - [x] AES
 - [ ] RSA
 
+### Install
+```groovy
+repositories {
+    mavenCentral()
+    maven {
+        url 'https://jitpack.io'
+    }
+}
+
+dependencies {
+    implementation "com.github.CUBETIQ:crypto-java:1.0"
+    
+    // other deps here
+}
+```
+
 - Basic
 
 ```java
