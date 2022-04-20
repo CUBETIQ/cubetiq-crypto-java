@@ -1,6 +1,8 @@
 package com.cubetiqs.crypto;
 
+import com.cubetiqs.crypto.core.CryptoUtil;
 import com.cubetiqs.crypto.provider.DefaultCryptoProvider;
+import com.cubetiqs.crypto.util.FunctionUtil;
 
 /**
  * Crypto, provides the methods to encrypt and decrypt the data with implemented for any provider
@@ -33,21 +35,41 @@ public class Crypto {
 
     private static Crypto instance;
 
-    public static Crypto createInstance(CryptoProvider provider) {
+    public static Crypto newInstance(CryptoProvider provider) {
         return new Crypto(provider);
     }
 
-    public static Crypto newInstance(CryptoProvider provider) {
+    public static Crypto createInstance(CryptoProvider provider) {
         if (instance == null) {
-            instance = createInstance(provider);
+            instance = newInstance(provider);
         }
         return instance;
+    }
+
+    public static Crypto newDefaultInstance(String keyText, String ivText) {
+        return newInstance(DefaultCryptoProvider.newInstance(encodeToBase64(keyText), encodeToBase64(ivText)));
     }
 
     public static Crypto defaultInstance(String key, String iv) {
         if (instance == null) {
-            instance = createInstance(new DefaultCryptoProvider(key, iv));
+            return createInstance(DefaultCryptoProvider.newInstance(key, iv));
         }
         return instance;
+    }
+
+    public static void resetInstance() {
+        instance = null;
+    }
+
+    public static String encodeToBase64(String text) {
+        return FunctionUtil.encodeToBase64(text);
+    }
+
+    public static String createKey() {
+        return CryptoUtil.createKey(32, null, null);
+    }
+
+    public static String createIV() {
+        return CryptoUtil.createRandomString(16);
     }
 }

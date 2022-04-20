@@ -12,11 +12,18 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.cubetiqs.crypto.util.FunctionUtil.DEFAULT_ENCODING;
-import static com.cubetiqs.crypto.util.FunctionUtil.decodeBase64;
+import static com.cubetiqs.crypto.util.FunctionUtil.*;
 
 public final class CryptoUtil {
     private static final int BUFFER_SIZE = 4 * 1024;
+
+    public static String createKey(int length, String algorithm, Integer keySize) {
+        return generateKey(length, algorithm, keySize);
+    }
+
+    public static String createRandomString(int length) {
+        return generateRandomString(length);
+    }
 
     public static byte[] encrypt(byte[] data, CryptoProvider.CryptoOptions options) {
         try (

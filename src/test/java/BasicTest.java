@@ -29,4 +29,12 @@ public class BasicTest {
         System.out.println("Decrypted: " + decrypted);
         Assertions.assertEquals(TEXT, decrypted);
     }
+
+    @Test
+    public void encodeToBase64Test() {
+        String text = "Hello World";
+        String textBase64 = "SGVsbG8gV29ybGQ=";
+        String encoded = FunctionUtil.encodeToBase64(text);
+        Assertions.assertEquals(textBase64, encoded);
+    }
 }
