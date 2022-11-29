@@ -67,22 +67,33 @@ public final class FunctionUtil {
     }
 
     public static String generateKey(int length, String algorithm, Integer keySize) {
+        if (length == 0) {
+            length = 32;
+        }
+
+        Key key = generateKey(algorithm, keySize);
+
+        if (key == null) {
+            return null;
+        }
+
+        return Base64.getEncoder().encodeToString(key.getEncoded()).substring(0, length);
+    }
+
+    public static Key generateKey(String algorithm, Integer keySize) {
         try {
             if (algorithm == null) {
                 algorithm = "AES";
             }
+
             if (keySize == null) {
                 keySize = 256;
             }
-            if (length == 0) {
-                length = 32;
-            }
-            Key key;
+
             SecureRandom random = new SecureRandom();
             KeyGenerator keyGenerator = KeyGenerator.getInstance(algorithm);
             keyGenerator.init(keySize, random);
-            key = keyGenerator.generateKey();
-            return Base64.getEncoder().encodeToString(key.getEncoded()).substring(0, length);
+            return keyGenerator.generateKey();
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
             return null;

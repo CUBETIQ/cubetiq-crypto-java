@@ -4,6 +4,8 @@ import com.cubetiqs.crypto.core.CryptoUtil;
 import com.cubetiqs.crypto.provider.DefaultCryptoProvider;
 import com.cubetiqs.crypto.util.FunctionUtil;
 
+import java.security.Key;
+
 /**
  * Crypto, provides the methods to encrypt and decrypt the data with implemented for any provider
  *
@@ -66,10 +68,18 @@ public class Crypto {
     }
 
     public static String createKey() {
-        return CryptoUtil.createKey(32, null, null);
+        return generateKey(32, null, null);
     }
 
     public static String createIV() {
         return CryptoUtil.createRandomString(16);
+    }
+
+    public static String generateKey(int length, String algorithm, Integer keySize) {
+        return CryptoUtil.createKey(length, algorithm, keySize);
+    }
+
+    public static Key secretKey(String algorithm, Integer keySize) {
+        return FunctionUtil.generateKey(algorithm, keySize);
     }
 }

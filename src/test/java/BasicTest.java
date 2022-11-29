@@ -1,7 +1,10 @@
+import com.cubetiqs.crypto.Crypto;
 import com.cubetiqs.crypto.core.CryptoUtil;
 import com.cubetiqs.crypto.util.FunctionUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.security.Key;
 
 public class BasicTest {
     String KEY = "wAsqXsY7ylinifToEac9+Ok/lu6pbMjaLXikyCF0L0o=";
@@ -36,5 +39,14 @@ public class BasicTest {
         String textBase64 = "SGVsbG8gV29ybGQ=";
         String encoded = FunctionUtil.encodeToBase64(text);
         Assertions.assertEquals(textBase64, encoded);
+    }
+
+    @Test
+    public void generateKey() {
+        Key key = Crypto.secretKey("HmacSHA256", 256);
+        System.out.println("Key: " + new String(key.getEncoded()));
+
+        String key32Bit = Crypto.generateKey(32, "HmacSHA256", 256);
+        System.out.println("Key 32 Bit: " + key32Bit);
     }
 }
