@@ -16,7 +16,7 @@ repositories {
 }
 
 dependencies {
-    implementation "com.github.CUBETIQ:crypto-java:1.0"
+    implementation "com.github.CUBETIQ:crypto-java:1.2"
     
     // other deps here
 }
